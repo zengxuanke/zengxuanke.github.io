@@ -1,9 +1,135 @@
+<!DOCTYPE html>
+<html >
+<script type="text/javaScript">
+	
+	var text = "" ;
+	function guessHm(){
+			//生成随机数1-32 1-16
+			var redBall = new Array() ;
+			
+			for(var i=0;i<6;){
+				var tempNum = parseInt(Math.random()*33+1);
+				if(tempNum<10){
+					tempNum = "0"+""+tempNum;
+				}
+				if(redBall.indexOf(tempNum)==-1){//没出现过，则可以加入生成
+					redBall.push(tempNum);
+					i++;
+				}
+			}
+			
+			var blueBall = parseInt(Math.random()*16+1);
+			if(blueBall<10){
+				blueBall = "0"+""+blueBall;
+			}
+			var redBall = redBall.sort();//排序
 
-<html>
-  <head></head>
-  <body>
-    <p> thankyou!</p>
-    # index file
-good boy
-  </body>
+			redBall.push(blueBall);
+			var guessStr = redBall.join();//转换成字符串
+			return guessStr;
+	}
+	function putNum(f){
+		var reader = new FileReader();
+		reader.readAsText(f);
+		reader.onload = function(){
+			text = reader.result;
+		}
+		reader.onerror = function(e){
+			console.log("error",e);
+		}
+		
+	}
+	function getNum(){
+			var outBz = false ;
+			while(!outBz){
+				var guessStr = guessHm();
+				if(check6lh(guessStr)){
+					continue ;
+				}
+				
+				var red = guessStr.substring(0,17);
+				var blue = guessStr.substring(17,guessStr.length);
+				var index = text.indexOf(guessStr);
+				var tbd = document.getElementById("yj");
+				var tbr = document.getElementById("br");
+				if(index==-1){//猜出来的数字不在历次开奖记录中，则返回这个开奖号码
+					outBz = true ;
+					
+					var htmStr = tbd.innerHTML;
+					tbd.innerHTML = htmStr+"<br/><td>=<span style='color:red'>"+red+"</span><span style='color:blue'>"+blue+"</span></td>"
+					
+				}else if(index!=-1){
+					
+					var htmStr = tbd.innerHTML;
+					tbd.innerHTML = htmStr+"<br/><td>=<span style='color:red'>"+red+"</span><span style='color:blue'>"+blue+"</span>号码在<span style='color:red'>"+text.substring(index+21,index+28)+"</span>期已出奖！</td>"
+				}
+				
+			}
+		
+			tbr.value = guessStr ;
+			tbr.focus();
+			
+	}
+	
+	function check6lh(guessStr){
+		//过滤6连号
+		var guessArr = guessStr.split(",");
+		//已知长度，取前5个数
+		var n1 = parseInt(guessArr[0]);
+		var n2 = parseInt(guessArr[1]);
+		var n3 = parseInt(guessArr[2]);
+		var n4 = parseInt(guessArr[3]);
+		var n5 = parseInt(guessArr[4]);
+		var n6 = parseInt(guessArr[5]);
+		if((n6 == n5+1)
+			&& (n5==n4+1)
+			&& (n4==n3+1)
+			&& (n3==n2+1)
+			&& (n2==n1+1)){
+			alert(guessStr+" 祝你好运！");
+			return true ;
+		}
+	}
+	function getJsonp(url,callBack){
+		var realUrl = "http://www.78500.cn/tool/ssqdb.html";
+		var cbnum = "cb"+parseInt(Math.random()*100+1);
+		var cbname = "getJsonp."+cbnum;
+		/*
+		if(realUrl.indexOf("?")== -1){
+			realUrl+="?jsonp="+"cbname";
+		}else{
+			realUrl+="&jsonp="+cbname;
+		}
+		*/
+		var script = document.createElement("script");
+		getJsonp[cbnum] = function(res){
+			try{
+				callBack(res);
+			}
+			finally{
+				delete getJsonp[cbnum];
+				script.parentNode.removeChild(script);
+			}
+		}
+		script.src = realUrl;
+		document.body.appendChild(script);
+	}
+	function callBack(res){
+	debugger ;
+		var i = 0 ;
+	}
+</script>
+	<body>
+		<table>
+			<tbody>
+			<th id="yj">预计开出号码</th>
+			
+			<tbody>
+		</table>
+		<input type="file" id="file"  value="读取历史开奖号码"onchange="putNum(this.files[0])"/>
+		<input type="button" id="jsonpKY" value= "获取网络开奖" onclick="getJsonp()"/>
+		<input type="button"   value="预测号码" onclick="getNum()"/>
+		<input id="br" type="text" disabled="true"/>
+	</body>
+
 </html>
